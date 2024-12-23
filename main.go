@@ -430,24 +430,63 @@ func runInteractiveMode(config Config, snippets []Snippet) error {
 func newList(items []list.Item, height int, styles SnippetsBaseStyle) *list.Model {
 	snippetList := list.New(items, snippetDelegate{styles, navigatingState}, 25, height)
 	snippetList.SetShowHelp(false)
-	snippetList.SetShowFilter(false)
 	snippetList.SetShowTitle(false)
-	snippetList.Styles.StatusBar = lipgloss.NewStyle().Margin(1, 2).Foreground(lipgloss.Color("240")).MaxWidth(35 - 2)
-	snippetList.Styles.NoItems = lipgloss.NewStyle().Margin(0, 2).Foreground(lipgloss.Color("8")).MaxWidth(35 - 2)
-	snippetList.FilterInput.Prompt = "Find: "
-	snippetList.FilterInput.PromptStyle = styles.Title
-	snippetList.SetStatusBarItemName("snippet", "snippets")
+	snippetList.SetShowFilter(false)
 	snippetList.DisableQuitKeybindings()
+	snippetList.SetStatusBarItemName("snippet", "snippets")
 	snippetList.Styles.Title = styles.Title
 	snippetList.Styles.TitleBar = styles.TitleBar
+	snippetList.Styles.StatusEmpty = styles.DeletedSubtitle
+	snippetList.Styles.StatusBarFilterCount = styles.UnselectedSubtitle
+	snippetList.Styles.NoItems = styles.UnselectedSubtitle.Margin(0, 2).MaxWidth(35 - 2)
+	snippetList.Styles.DividerDot = snippetList.Styles.DividerDot.Foreground(styles.UnselectedSubtitle.GetForeground())
+	snippetList.FilterInput.Prompt = "Find: "
+	snippetList.FilterInput.PromptStyle = styles.Title
+	filterStyle := styles.Title.Background(styles.TitleBar.GetBackground())
+	snippetList.FilterInput.TextStyle = filterStyle
+	snippetList.FilterInput.Cursor.Style = filterStyle
+	snippetList.FilterInput.Cursor.TextStyle = filterStyle
 
 	return &snippetList
+}
+
+func snippetInputs(config Config) []textinput.Model {
+	input := func(p string) textinput.Model {
+		i := newTextInput(p)
+		s := lipgloss.NewStyle().Foreground(lipgloss.Color(config.ForegroundColor))
+		i.TextStyle = s
+		i.Cursor.Style = s
+		i.PlaceholderStyle = lipgloss.NewStyle().Foreground(lipgloss.Color(config.BlackColor))
+		return i
+	}
+	return []textinput.Model{
+		input(defaultSnippetFolder + " "),
+		input(defaultSnippetName + " "),
+		input(config.DefaultLanguage),
+	}
 }
 
 func newTextInput(placeholder string) textinput.Model {
 	i := textinput.New()
 	i.Prompt = ""
-	i.PromptStyle = lipgloss.NewStyle().Margin(0, 1)
 	i.Placeholder = placeholder
+	i.PromptStyle = lipgloss.NewStyle().Margin(0, 1)
 	return i
+}
+
+func defaultHelp(config Config) help.Model {
+	h := help.New()
+
+	keyStyle := lipgloss.NewStyle().Foreground(lipgloss.Color(config.GrayColor))
+	descStyle := lipgloss.NewStyle().Foreground(lipgloss.Color(config.BlackColor))
+	separatorStyle := lipgloss.NewStyle().Foreground(lipgloss.Color(config.BlackColor))
+
+	h.Styles.ShortKey = keyStyle
+	h.Styles.ShortDesc = descStyle
+	h.Styles.ShortSeparator = separatorStyle
+	h.Styles.FullKey = keyStyle
+	h.Styles.FullDesc = descStyle
+	h.Styles.FullSeparator = separatorStyle
+
+	return h
 }

@@ -89,8 +89,6 @@ type Model struct {
 
 // Init initialzes the application model.
 func (m *Model) Init() tea.Cmd {
-	rand.Seed(time.Now().Unix())
-
 	m.Folders.Styles.Title = m.FoldersStyle.Title
 	m.Folders.Styles.TitleBar = m.FoldersStyle.TitleBar
 	m.updateKeyMap()
@@ -614,7 +612,7 @@ func (m *Model) createNewSnippetFile() tea.Cmd {
 			folder = folderItem.FilterValue()
 		}
 
-		file := fmt.Sprintf("snippet-%d.%s", rand.Intn(1000000), m.config.DefaultLanguage)
+		file := fmt.Sprintf("snippet-%d.%s", rand.Intn(1_000_000), m.config.DefaultLanguage)
 
 		newSnippet := Snippet{
 			Name:     defaultSnippetName,
