@@ -358,8 +358,8 @@ func runInteractiveMode(config Config, snippets []Snippet) error {
 	folderList.SetFilteringEnabled(false)
 	folderList.SetShowStatusBar(false)
 	folderList.DisableQuitKeybindings()
-	folderList.Styles.NoItems = lipgloss.NewStyle().Margin(0, 2).Foreground(lipgloss.Color(config.GrayColor))
 	folderList.SetStatusBarItemName("folder", "folders")
+	folderList.Styles.NoItems = lipgloss.NewStyle().Margin(0, 2).Foreground(lipgloss.Color(config.GrayColor))
 
 	for idx, folder := range foldersSlice {
 		if string(folder) == state.CurrentFolder {
@@ -394,14 +394,10 @@ func runInteractiveMode(config Config, snippets []Snippet) error {
 		ListStyle:    defaultStyles.Snippets.Focused,
 		FoldersStyle: defaultStyles.Folders.Blurred,
 		keys:         DefaultKeyMap,
-		help:         help.New(),
 		config:       config,
-		inputs: []textinput.Model{
-			newTextInput(defaultSnippetFolder + " "),
-			newTextInput(defaultSnippetName + " "),
-			newTextInput(config.DefaultLanguage),
-		},
-		tagsInput: newTextInput("Tags"),
+		inputs:       snippetInputs(config),
+		tagsInput:    newTextInput("Tags"),
+		help:         defaultHelp(config),
 	}
 	p := tea.NewProgram(m, tea.WithAltScreen())
 	model, err := p.Run()
@@ -437,6 +433,7 @@ func newList(items []list.Item, height int, styles SnippetsBaseStyle) *list.Mode
 	snippetList.Styles.Title = styles.Title
 	snippetList.Styles.TitleBar = styles.TitleBar
 	snippetList.Styles.StatusEmpty = styles.DeletedSubtitle
+	snippetList.Styles.StatusBar = styles.StatusBar
 	snippetList.Styles.StatusBarFilterCount = styles.UnselectedSubtitle
 	snippetList.Styles.NoItems = styles.UnselectedSubtitle.Margin(0, 2).MaxWidth(35 - 2)
 	snippetList.Styles.DividerDot = snippetList.Styles.DividerDot.Foreground(styles.UnselectedSubtitle.GetForeground())

@@ -24,17 +24,19 @@ type Config struct {
 
 	Theme string `env:"NAP_THEME" yaml:"theme"`
 
+	BackgroundColor     string `env:"NAP_BACKGROUND" yaml:"background"`
+	ForegroundColor     string `env:"NAP_FOREGROUND" yaml:"foreground"`
+	BlackColor          string `env:"NAP_BLACK" yaml:"black"`
+	GrayColor           string `env:"NAP_GRAY" yaml:"gray"`
+	BrightGrayColor     string `env:"NAP_BRIGHT_GRAY" yaml:"bright_gray"`
+	WhiteColor          string `env:"NAP_WHITE" yaml:"white"`
 	PrimaryColor        string `env:"NAP_PRIMARY_COLOR" yaml:"primary_color"`
 	PrimaryColorSubdued string `env:"NAP_PRIMARY_COLOR_SUBDUED" yaml:"primary_color_subdued"`
-	BrightGreenColor    string `env:"NAP_BRIGHT_GREEN" yaml:"bright_green"`
-	GreenColor          string `env:"NAP_GREEN" yaml:"green"`
-	BrightRedColor      string `env:"NAP_BRIGHT_RED" yaml:"bright_red"`
 	RedColor            string `env:"NAP_RED" yaml:"red"`
-	ForegroundColor     string `env:"NAP_FOREGROUND" yaml:"foreground"`
-	BackgroundColor     string `env:"NAP_BACKGROUND" yaml:"background"`
-	GrayColor           string `env:"NAP_GRAY" yaml:"gray"`
-	BlackColor          string `env:"NAP_BLACK" yaml:"black"`
-	WhiteColor          string `env:"NAP_WHITE" yaml:"white"`
+	BrightRedColor      string `env:"NAP_BRIGHT_RED" yaml:"bright_red"`
+	GreenColor          string `env:"NAP_GREEN" yaml:"green"`
+	BrightGreenColor    string `env:"NAP_BRIGHT_GREEN" yaml:"bright_green"`
+	StatusColor         string `env:"NAP_STATUS_COLOR" yaml:"status_color"`
 }
 
 func newConfig() Config {
@@ -43,17 +45,18 @@ func newConfig() Config {
 		File:                "snippets.json",
 		DefaultLanguage:     defaultLanguage,
 		Theme:               "dracula",
+		BackgroundColor:     "235",
+		ForegroundColor:     "15",
+		BlackColor:          "#373B41",
+		GrayColor:           "235",
+		BrightGrayColor:     "241",
+		WhiteColor:          "#FFFFFF",
 		PrimaryColor:        "#AFBEE1",
 		PrimaryColorSubdued: "#64708D",
-		BrightGreenColor:    "#BCE1AF",
-		GreenColor:          "#527251",
-		BrightRedColor:      "#E49393",
 		RedColor:            "#A46060",
-		ForegroundColor:     "15",
-		BackgroundColor:     "235",
-		GrayColor:           "241",
-		BlackColor:          "#373b41",
-		WhiteColor:          "#FFFFFF",
+		BrightRedColor:      "#E49393",
+		GreenColor:          "#527251",
+		BrightGreenColor:    "#BCE1AF",
 	}
 }
 
