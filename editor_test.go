@@ -1,65 +1,120 @@
 package main
 
 import (
-	"fmt"
 	"os"
+	"path/filepath"
 	"testing"
 )
 
 func TestGetEditor(t *testing.T) {
 	tt := []struct {
-		Name      string
-		EditorEnv string
-		Cmd       string
-		Args      []string
+		name     string
+		visual   string
+		editor   string
+		expected string
 	}{
 		{
-			Name: "default",
-			Cmd:  "nano",
+			name:     "default",
+			expected: "nano",
 		},
 		{
-			Name:      "vim",
-			EditorEnv: "vim",
-			Cmd:       "vim",
+			name:     "$EDITOR only",
+			editor:   "vim",
+			expected: "vim",
 		},
 		{
-			Name:      "vim with flag",
-			EditorEnv: "vim --foo",
-			Cmd:       "vim",
-			Args:      []string{"--foo"},
+			name:     "$VISUAL only",
+			visual:   "code -w",
+			expected: "code -w",
 		},
 		{
-			Name:      "code",
-			EditorEnv: "code -w",
-			Cmd:       "code",
-			Args:      []string{"-w"},
+			name:     "both set - $VISIAL wins",
+			visual:   "code -w",
+			editor:   "vim",
+			expected: "code -w",
 		},
 	}
 
 	for _, tc := range tt {
-		t.Run(tc.Name, func(t *testing.T) {
-			var err error
-			switch tc.EditorEnv {
-			case "":
-				err = os.Unsetenv("EDITOR")
-			default:
-				err = os.Setenv("EDITOR", tc.EditorEnv)
+		t.Run(tc.name, func(t *testing.T) {
+			if tc.visual != "" {
+				os.Setenv("VISUAL", tc.visual)
+			} else {
+				os.Unsetenv("VISUAL")
 			}
-			if err != nil {
-				t.Logf("could not (un)set env: %v", err)
-				t.FailNow()
-			}
-
-			cmd, args := getEditor()
-
-			if cmd != tc.Cmd {
-				t.Logf("cmd is incorrect: want %q but got %q", tc.Cmd, cmd)
-				t.FailNow()
+			if tc.editor != "" {
+				os.Setenv("EDITOR", tc.editor)
+			} else {
+				os.Unsetenv("EDITOR")
 			}
 
-			if argStr, tcArgStr := fmt.Sprint(args), fmt.Sprint(tc.Args); argStr != tcArgStr {
-				t.Logf("args are incorrect: want %q but got %q", tcArgStr, argStr)
-				t.FailNow()
+			got := getEditor()
+			if got != tc.expected {
+				t.Errorf("getEditor() = %v, want %v", got, tc.expected)
+			}
+		})
+	}
+}
+
+func TestEditorCmd(t *testing.T) {
+	tt := []struct {
+		name     string
+		editor   string
+		path     string
+		wantCmd  string
+		wantArgs []string
+	}{
+		{
+			name:     "simple editor",
+			editor:   "nano",
+			path:     "test.txt",
+			wantCmd:  "nano",
+			wantArgs: []string{"test.txt"},
+		},
+		{
+			name:     "editor with flags",
+			editor:   "code --wait",
+			path:     "test.txt",
+			wantCmd:  "code",
+			wantArgs: []string{"--wait", "test.txt"},
+		},
+		{
+			name:     "empty editor",
+			editor:   "",
+			path:     "test.txt",
+			wantCmd:  "",
+			wantArgs: nil,
+		},
+	}
+
+	for _, tc := range tt {
+		t.Run(tc.name, func(t *testing.T) {
+			cmd := editorCmd(tc.editor, tc.path)
+			if tc.editor == "" {
+				if cmd != nil {
+					t.Errorf("editorCmd() = %v, want nil", cmd)
+				}
+				return
+			}
+
+			if filepath.Base(cmd.Path) != tc.wantCmd {
+				t.Errorf("cmd.Path = %v, want %v", cmd.Path, tc.wantCmd)
+			}
+
+			if len(cmd.Args) < 2 {
+				t.Errorf("cmd.Args too short = %v", cmd.Args)
+				return
+			}
+
+			gotArgs := cmd.Args[1:]
+			if len(gotArgs) != len(tc.wantArgs) {
+				t.Errorf("cmd.Args = %v, want %v", gotArgs, tc.wantArgs)
+			}
+
+			for i := range gotArgs {
+				if gotArgs[i] != tc.wantArgs[i] {
+					t.Errorf("cmd.Args[%d] = %v, want %v", i, gotArgs[i], tc.wantArgs[i])
+				}
 			}
 		})
 	}

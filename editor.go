@@ -8,17 +8,20 @@ import (
 
 const defaultEditor = "nano"
 
-// Cmd returns a *exec.Cmd editing the given path with $EDITOR or nano if no
-// $EDITOR is set.
-func editorCmd(path string) *exec.Cmd {
-	editor, args := getEditor()
-	return exec.Command(editor, append(args, path)...)
+func getEditor() string {
+	if v := os.Getenv("VISUAL"); v != "" {
+		return v
+	}
+	if e := os.Getenv("EDITOR"); e != "" {
+		return e
+	}
+	return defaultEditor
 }
 
-func getEditor() (string, []string) {
-	editor := strings.Fields(os.Getenv("EDITOR"))
-	if len(editor) > 0 {
-		return editor[0], editor[1:]
+// editorCmd creates a command to edit the given path using the specified editor string.
+func editorCmd(editor, path string) *exec.Cmd {
+	if c := strings.Fields(editor); len(c) > 0 {
+		return exec.Command(c[0], append(c[1:], path)...)
 	}
-	return defaultEditor, nil
+	return nil
 }

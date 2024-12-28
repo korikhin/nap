@@ -385,7 +385,8 @@ func (m *Model) previousPane() {
 
 // editSnippet opens the editor with the selected snippet file path.
 func (m *Model) editSnippet() tea.Cmd {
-	return tea.ExecProcess(editorCmd(m.selectedSnippetFilePath()), func(err error) tea.Msg {
+	cmd := editorCmd(m.config.Editor, m.selectedSnippetFilePath())
+	return tea.ExecProcess(cmd, func(err error) tea.Msg {
 		return updateContentMsg(m.selectedSnippet())
 	})
 }

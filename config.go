@@ -17,13 +17,12 @@ import (
 // At the moment, it is quite limited, only supporting the home folder and the
 // file name of the metadata.
 type Config struct {
-	Home string `env:"NAP_HOME" yaml:"home"`
-	File string `env:"NAP_FILE" yaml:"file"`
-
+	Home            string `env:"NAP_HOME" yaml:"home"`
+	File            string `env:"NAP_FILE" yaml:"file"`
+	Editor          string `env:"NAP_EDITOR" yaml:"editor"`
 	DefaultLanguage string `env:"NAP_DEFAULT_LANGUAGE" yaml:"default_language"`
 
-	Theme string `env:"NAP_THEME" yaml:"theme"`
-
+	Theme               string `env:"NAP_THEME" yaml:"theme"`
 	BackgroundColor     string `env:"NAP_BACKGROUND" yaml:"background"`
 	ForegroundColor     string `env:"NAP_FOREGROUND" yaml:"foreground"`
 	BlackColor          string `env:"NAP_BLACK" yaml:"black"`
@@ -44,6 +43,7 @@ func newConfig() Config {
 		Home:                defaultHome(),
 		File:                "snippets.json",
 		DefaultLanguage:     defaultLanguage,
+		Editor:              "", // defined at config build
 		Theme:               "dracula",
 		BackgroundColor:     "235",
 		ForegroundColor:     "15",
@@ -69,11 +69,10 @@ func defaultConfig() string {
 	if c := os.Getenv("NAP_CONFIG"); c != "" {
 		return c
 	}
-	cfgPath, err := xdg.ConfigFile("nap/config.yaml")
-	if err != nil {
-		return "config.yaml"
+	if cfgPath, err := xdg.ConfigFile("nap/config.yaml"); err == nil {
+		return cfgPath
 	}
-	return cfgPath
+	return "config.yaml"
 }
 
 // readConfig returns a configuration read from the environment.
@@ -89,7 +88,6 @@ func readConfig() Config {
 			return newConfig()
 		}
 	}
-
 	if err := env.Parse(&config); err != nil {
 		return newConfig()
 	}
@@ -99,6 +97,9 @@ func readConfig() Config {
 		if err == nil {
 			config.Home = filepath.Join(home, config.Home[1:])
 		}
+	}
+	if config.Editor == "" {
+		config.Editor = getEditor()
 	}
 
 	return config
